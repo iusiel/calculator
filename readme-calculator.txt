@@ -1,0 +1,1 @@
+firefox -private-window index.html // sample command to open file
