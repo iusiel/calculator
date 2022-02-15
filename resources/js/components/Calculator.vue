@@ -31,7 +31,7 @@ export default {
       }
 
       // make this.currentNumber and this.currentEquation empty arrays if user pressed a number as the very first input and the number inputted is not zero
-      if (this.currentNumber[0] == 0 && this.currentEquation[0] == 0 && number != 0) {
+      if (this.currentNumber[0] == 0 && this.currentEquation[0] == 0 && number != 0 && this.lastOperation !== 'dotPress') {
         this.currentNumber = [];
         this.currentEquation = [];
       }
@@ -118,7 +118,7 @@ export default {
         result = firstNumber / secondNumber;
       }
       
-      // remopve in array after performing operation so that they will not be repeated
+      // remove in array after performing operation so that they will not be repeated
       this.currentEquation[index - 1] = result;
       this.currentEquation.splice(index, 1);
       this.currentEquation.splice(index, 1);
@@ -167,6 +167,37 @@ export default {
 
       this.displayContent = `${this.displayContent} <br/> <b>= ${result}</b> <br/><br/>`;
       this.lastOperation = 'equalsPress';
+    },
+
+    dotPressAllowed() {
+      if (this.lastOperation === 'dotPress' || this.currentNumber.includes(".") === true) {
+        return false;
+      }
+
+
+      return true;
+    },
+
+    dotPress()
+    {
+      console.log(this.currentEquation[0] == 0);
+      console.log(this.currentNumber[0] == 0);
+      if (!this.dotPressAllowed()) {
+        return false;
+      }
+
+      if (this.currentNumber[0] == 0 && this.currentEquation[0] == 0) {
+        this.currentEquation = [];
+      }
+
+      // Display 0 on screen if first button pressed by user is .(dot) or if last pressed button is operation (e.g +, -)
+      if ((this.currentNumber[0] == 0 && this.currentEquation.length === 0) || (this.lastOperation === 'operatorPress')) {
+        this.displayContent = `${this.displayContent}0`;
+      }
+
+      this.currentNumber.push('.');
+      this.displayContent = `${this.displayContent}.`;
+      this.lastOperation = 'dotPress';
     }
   }
 }
@@ -191,6 +222,7 @@ export default {
             <calculator-button v-on:button-pressed="operatorPress" press="*" label="×"></calculator-button>
             <calculator-button v-on:button-pressed="operatorPress" press="/" label="÷"></calculator-button>
             <calculator-button v-on:button-pressed="equalsPress" press="="></calculator-button>
+            <calculator-button v-on:button-pressed="dotPress" press="."></calculator-button>
         </div>  
     </div>
 </template>
