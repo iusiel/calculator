@@ -69,7 +69,7 @@ export default {
 
       }
 
-      if (this.currentEquation.length === 1) {
+      if (this.currentEquation.length === 1 && this.lastOperation !== 'deletePress') {
         this.displayContent = `${this.displayContent} ${this.currentEquation[0]} `; //display first number before displaying the operation symbol
       }
 
@@ -82,7 +82,7 @@ export default {
 
       this.currentEquation.push(operator);
 
-      this.lastOperation = 'operatorPress';
+      this.lastOperation = 'z';
     },
 
     equalsPressAllowed() {
@@ -198,6 +198,18 @@ export default {
       this.currentNumber.push('.');
       this.displayContent = `${this.displayContent}.`;
       this.lastOperation = 'dotPress';
+    },
+
+    deletePress() {
+      if (this.currentNumber.length === 0 && this.currentEquation.length > 0) {
+        this.currentEquation.pop();
+        this.displayContent = this.displayContent.slice(0, -2);
+        this.lastOperation = 'deletePress';
+      } else if (this.currentNumber.length > 0) {
+        this.currentNumber.pop();
+        this.displayContent = this.displayContent.slice(0, -1);
+        this.lastOperation = 'deletePress';
+      }
     }
   }
 }
@@ -223,6 +235,7 @@ export default {
             <calculator-button v-on:button-pressed="operatorPress" press="/" label="÷"></calculator-button>
             <calculator-button v-on:button-pressed="equalsPress" press="="></calculator-button>
             <calculator-button v-on:button-pressed="dotPress" press="."></calculator-button>
+            <calculator-button v-on:button-pressed="deletePress" press="Backspace" label="Delete"></calculator-button>
         </div>  
     </div>
 </template>
