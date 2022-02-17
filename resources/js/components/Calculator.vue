@@ -25,13 +25,16 @@ export default {
     },
 
     numberPress(number) {
-
+      // console.log(this.currentNumber);
+      // console.log(this.currentEquation);
+      // console.log(this.displayContent);
       if (!this.numberPressAllowed(number)) {
         return false;
       }
 
       // make this.currentNumber and this.currentEquation empty arrays if user pressed a number as the very first input and the number inputted is not zero
       if (this.currentNumber[0] == 0 && this.currentEquation[0] == 0 && number != 0 && this.lastOperation !== 'dotPress') {
+        // alert("!");
         this.currentNumber = [];
         this.currentEquation = [];
       }
@@ -47,6 +50,7 @@ export default {
     },
 
     operatorPress(operator) {
+      console.log(this.displayContent.split(""));
       let symbol = operator;
       if (symbol === "/") {
         symbol = "÷";
@@ -69,8 +73,8 @@ export default {
 
       }
 
-      if (this.currentEquation.length === 1 && this.lastOperation !== 'deletePress') {
-        this.displayContent = `${this.displayContent} ${this.currentEquation[0]} `; //display first number before displaying the operation symbol
+      if (this.currentEquation.length === 1) {
+        this.displayContent = `${this.displayContent}${this.currentEquation[0]}`; //display first number before displaying the operation symbol
       }
 
       this.displayContent = `${this.displayContent} ${symbol} `; //display operation symbol
@@ -82,7 +86,7 @@ export default {
 
       this.currentEquation.push(operator);
 
-      this.lastOperation = 'z';
+      this.lastOperation = 'operatorPress';
     },
 
     equalsPressAllowed() {
@@ -201,15 +205,35 @@ export default {
     },
 
     deletePress() {
-      if (this.currentNumber.length === 0 && this.currentEquation.length > 0) {
+     
+      if (this.currentNumber.length === 0 && this.currentEquation.length > 0 && (this.lastOperation === 'operatorPress' || this.lastOperation === 'deletePress')) {
         this.currentEquation.pop();
-        this.displayContent = this.displayContent.slice(0, -2);
+        this.displayContent = this.displayContent.slice(0, -3);
         this.lastOperation = 'deletePress';
-      } else if (this.currentNumber.length > 0) {
+
+
+        // if (this.currentNumber.length === 0 && this.currentEquation > 0) {
+          this.currentNumber = this.currentEquation.pop().split("");
+        // }
+
+      } else if (this.currentNumber.length > 0 && this.currentNumber[0] != 0 && (this.lastOperation === 'numberPress' || this.lastOperation === 'deletePress')) {
+
+
         this.currentNumber.pop();
         this.displayContent = this.displayContent.slice(0, -1);
         this.lastOperation = 'deletePress';
+        
+        if (this.currentNumber.length === 0 && this.currentEquation.length === 0) {
+          this.currentNumber = [0];
+          this.currentEquation = [0];
+          // this.displayContent = `${this.displayContent} ${this.currentEquation[0]}`; //display first number before displaying the operation symbol
+        }
+
       }
+
+      console.log(this.currentNumber);
+      console.log(this.currentEquation);
+
     }
   }
 }
