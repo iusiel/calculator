@@ -5,13 +5,22 @@ import CalculatorButton from './CalculatorButton';
 export default {
   data: function() {
     return {
-      displayContent: '',
-      currentNumber: [0], 
-      currentEquation: [0],
+      currentEquation: [],
+      documentElements: [],
       lastOperation: '',
     }
   },
 
+  computed: {
+    displayContent() {
+      let result = '';
+      this.documentElements.forEach((element) => {
+        result = `${result}${element.outerHTML}`
+      });
+
+      return result;
+    }
+  },
   components: {
       Display,
       CalculatorButton,
@@ -25,32 +34,44 @@ export default {
     },
 
     numberPress(number) {
-      // console.log(this.currentNumber);
-      // console.log(this.currentEquation);
-      // console.log(this.displayContent);
       if (!this.numberPressAllowed(number)) {
         return false;
       }
 
-      // make this.currentNumber and this.currentEquation empty arrays if user pressed a number as the very first input and the number inputted is not zero
-      if (this.currentNumber[0] == 0 && this.currentEquation[0] == 0 && number != 0 && this.lastOperation !== 'dotPress') {
-        // alert("!");
-        this.currentNumber = [];
-        this.currentEquation = [];
-      }
-
       if (this.lastOperation === 'equalsPress') {
-        this.currentNumber = [];
         this.currentEquation = [];
       }
 
-      this.displayContent = `${this.displayContent}${number}`;
-      this.currentNumber.push(number);
+      const lastElement = this.currentEquation.pop();
+      const operations = ["+", "-", "*", "/"];
+      if (operations.includes(lastElement)) {
+        this.currentEquation.push(lastElement); //re-add operation to currentEquation array
+
+        const span = document.createElement('span');
+        span.innerText = number;
+        this.documentElements.push(span);
+
+        this.currentEquation.push(number);
+      } else {
+        const span = document.createElement('span');
+        span.innerText = number;
+        this.documentElements.push(span);
+
+        const currentNumber = (lastElement !== undefined)  ? `${lastElement}${number}` : number;
+        this.currentEquation.push(currentNumber);
+      }
+
+      console.log(this.currentEquation);
+
+
       this.lastOperation = 'numberPress';
     },
 
     operatorPress(operator) {
-      console.log(this.displayContent.split(""));
+      if (this.lastOperation === 'dotPress') {
+        return false;
+      }
+
       let symbol = operator;
       if (symbol === "/") {
         symbol = "÷";
@@ -60,29 +81,34 @@ export default {
         symbol = "×";
       }
 
-      // remove first element in case user pressed operation as first button before any number. this happens because this.currentEquation = [0] instead of this.currentEquation = [] which causes display issue if user tries to enter another operation
-      // example that should be catched: + 1
-      // example that should not be catched: 1 + 1
-      if (this.currentEquation.length > 1 && this.currentEquation[0] == 0) {
-        this.currentEquation.shift();
+      // automatically set display to 0 if user presses an operation button first
+      if (this.currentEquation.length === 0 && this.documentElements.length === 0) {
+          const span = document.createElement('span');
+          span.innerText = 0;
+          this.documentElements.push(span);
+          this.currentEquation.push(0);
       }
+
+      // display last result again if user presses operation button after pressing equals press
+      if (this.currentEquation.length === 1 && this.lastOperation === 'equalsPress') {
+          const splitted = this.currentEquation[0].toString().split("");
+          splitted.forEach((element) => {
+            const span = document.createElement('span');
+            span.innerText = element;
+            this.documentElements.push(span);
+          });
+      }
+
 
       if (this.lastOperation === 'operatorPress') {
-        this.displayContent = this.displayContent.slice(0, -2); //replace current operator symbol if user presses another operator symbol
+        this.documentElements.pop();
         this.currentEquation.pop(); //remove last operation since the current operation will be overridden by new operation selected by user
-
       }
 
-      if (this.currentEquation.length === 1) {
-        this.displayContent = `${this.displayContent}${this.currentEquation[0]}`; //display first number before displaying the operation symbol
-      }
 
-      this.displayContent = `${this.displayContent} ${symbol} `; //display operation symbol
-      const number = this.currentNumber.join("");
-      if (number != "") {
-        this.currentEquation.push(number); //generate full number based on digits pressed
-        this.currentNumber = [];
-      }
+      const span = document.createElement('span');
+      span.innerText = symbol;
+      this.documentElements.push(span);
 
       this.currentEquation.push(operator);
 
@@ -135,12 +161,7 @@ export default {
         return false;
       }
 
-
-      const number = this.currentNumber.join("");
-      this.currentEquation.push(number);
-      this.currentNumber = [];
       let result;
-
 
       //loop using MDAS priority. calculation will continue until all calculations are finished
       while (this.currentEquation.length > 2) {
@@ -148,92 +169,98 @@ export default {
         let index = this.currentEquation.findIndex(multiplicationSymbol);
         if (index !== -1) {
           result = this.performOperation("*", index);
+          continue;
         }
 
         const divisionSymbol = (element) => element == "/";
         index = this.currentEquation.findIndex(divisionSymbol);
         if (index !== -1) {
           result = this.performOperation("/", index);
+          continue;
         }
 
         const additionSymbol = (element) => element == "+";
         index = this.currentEquation.findIndex(additionSymbol);
         if (index !== -1) {
           result = this.performOperation("+", index);
+          continue;
         }
 
         const subtractionSymbol = (element) => element == "-";
         index = this.currentEquation.findIndex(subtractionSymbol);
         if (index !== -1) {
           result = this.performOperation("-", index);
+          continue;
         }
+
       }
 
-      this.displayContent = `${this.displayContent} <br/> <b>= ${result}</b> <br/><br/>`;
+      const div = document.createElement('div');
+      div.innerHTML = `<span>=</span><span>${result}</span>`;
+      this.documentElements.push(div);
+
       this.lastOperation = 'equalsPress';
     },
 
     dotPressAllowed() {
-      if (this.lastOperation === 'dotPress' || this.currentNumber.includes(".") === true) {
+      const lastElement = `${this.currentEquation.slice("-1")}`;
+  
+      if (this.lastOperation === 'dotPress' || (this.lastOperation === 'numberPress' && lastElement.includes(".") === true)) {
         return false;
       }
-
 
       return true;
     },
 
     dotPress()
     {
-      console.log(this.currentEquation[0] == 0);
-      console.log(this.currentNumber[0] == 0);
       if (!this.dotPressAllowed()) {
         return false;
       }
 
-      if (this.currentNumber[0] == 0 && this.currentEquation[0] == 0) {
-        this.currentEquation = [];
+      if (this.lastOperation === 'equalsPress') {
+        const span = document.createElement('span');
+        span.innerText = "0";
+        this.documentElements.push(span);
+        this.currentEquation.push(0);   
       }
 
       // Display 0 on screen if first button pressed by user is .(dot) or if last pressed button is operation (e.g +, -)
-      if ((this.currentNumber[0] == 0 && this.currentEquation.length === 0) || (this.lastOperation === 'operatorPress')) {
-        this.displayContent = `${this.displayContent}0`;
+      if ((this.currentEquation.length === 0) || (this.lastOperation === 'operatorPress')) {
+        const span = document.createElement('span');
+        span.innerText = "0";
+        this.documentElements.push(span);
+        this.currentEquation.push(0);
       }
 
-      this.currentNumber.push('.');
-      this.displayContent = `${this.displayContent}.`;
+      const lastElement = this.currentEquation.pop();
+      const newElement = (lastElement !== undefined)  ? `${parseFloat(lastElement)}.`  : ".";
+      this.currentEquation.push(newElement);
+
+      const span = document.createElement('span');
+      span.innerText = ".";
+      this.documentElements.push(span);
+
       this.lastOperation = 'dotPress';
     },
 
     deletePress() {
-     
-      if (this.currentNumber.length === 0 && this.currentEquation.length > 0 && (this.lastOperation === 'operatorPress' || this.lastOperation === 'deletePress')) {
-        this.currentEquation.pop();
-        this.displayContent = this.displayContent.slice(0, -3);
-        this.lastOperation = 'deletePress';
+      const lastDocumentElement = this.documentElements.slice(-1);
 
-
-        // if (this.currentNumber.length === 0 && this.currentEquation > 0) {
-          this.currentNumber = this.currentEquation.pop().split("");
-        // }
-
-      } else if (this.currentNumber.length > 0 && this.currentNumber[0] != 0 && (this.lastOperation === 'numberPress' || this.lastOperation === 'deletePress')) {
-
-
-        this.currentNumber.pop();
-        this.displayContent = this.displayContent.slice(0, -1);
-        this.lastOperation = 'deletePress';
-        
-        if (this.currentNumber.length === 0 && this.currentEquation.length === 0) {
-          this.currentNumber = [0];
-          this.currentEquation = [0];
-          // this.displayContent = `${this.displayContent} ${this.currentEquation[0]}`; //display first number before displaying the operation symbol
-        }
-
+      // disable delete if last element is not a deleteable element (e.g. inputted number, operation)
+      if (lastDocumentElement[0].nodeName == "DIV") {
+        return false;
       }
 
-      console.log(this.currentNumber);
-      console.log(this.currentEquation);
-
+      if (this.currentEquation.length > 0) {
+        const lastElement = `${this.currentEquation.pop()}`;
+        const newElement = lastElement.slice(0, lastElement.length - 1);
+        if (newElement.length > 0) {
+          this.currentEquation.push(newElement);
+        }
+        this.documentElements.pop();
+      }
+      this.lastOperation = 'deletePress';
     }
   }
 }
