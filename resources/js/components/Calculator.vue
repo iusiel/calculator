@@ -61,9 +61,6 @@ export default {
         this.currentEquation.push(currentNumber);
       }
 
-      console.log(this.currentEquation);
-
-
       this.lastOperation = 'numberPress';
     },
 
