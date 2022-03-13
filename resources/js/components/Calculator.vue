@@ -163,34 +163,42 @@ export default {
       //loop using MDAS priority. calculation will continue until all calculations are finished
       while (this.currentEquation.length > 2) {
         const multiplicationSymbol = (element) => element == "*";
-        let index = this.currentEquation.findIndex(multiplicationSymbol);
-        if (index !== -1) {
-          result = this.performOperation("*", index);
-          continue;
+        let multiplyIndex = this.currentEquation.findIndex(multiplicationSymbol);
+        if (multiplyIndex !== -1) {
+            result = this.performOperation("*", multiplyIndex);
+            continue;
         }
 
         const divisionSymbol = (element) => element == "/";
-        index = this.currentEquation.findIndex(divisionSymbol);
-        if (index !== -1) {
-          result = this.performOperation("/", index);
+        let divisionIndex = this.currentEquation.findIndex(divisionSymbol);
+        if (divisionIndex !== -1) {
+          result = this.performOperation("/", divisionIndex);
           continue;
         }
 
         const additionSymbol = (element) => element == "+";
-        index = this.currentEquation.findIndex(additionSymbol);
-        if (index !== -1) {
-          result = this.performOperation("+", index);
-          continue;
-        }
+        let additionIndex = this.currentEquation.findIndex(additionSymbol);
 
         const subtractionSymbol = (element) => element == "-";
-        index = this.currentEquation.findIndex(subtractionSymbol);
-        if (index !== -1) {
-          result = this.performOperation("-", index);
-          continue;
+        let subtractionIndex = this.currentEquation.findIndex(subtractionSymbol);
+  
+        if (additionIndex !== -1 || subtractionIndex !== -1) {
+          if (additionIndex < subtractionIndex && additionIndex !== -1) {
+            result = this.performOperation("+", additionIndex);
+            continue;
+          } else if (subtractionIndex < additionIndex && subtractionIndex !== -1) {
+            result = this.performOperation("-", subtractionIndex);
+            continue;
+          } else if (additionIndex < subtractionIndex && subtractionIndex !== -1) {
+            result = this.performOperation("-", subtractionIndex);
+            continue;
+          } else {
+            result = this.performOperation("+", additionIndex);
+            continue;
+          }
         }
-
       }
+
 
       const div = document.createElement('div');
       div.innerHTML = `<span>=</span><span>${result}</span>`;
