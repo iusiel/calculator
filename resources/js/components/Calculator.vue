@@ -27,9 +27,12 @@ export default {
     },
   methods: {
     numberPressAllowed(number) {
-      if (this.displayContent === "" && number == 0) {
+      const lastElement = this.currentEquation.slice(-1);
+      const predictedNumber = (lastElement[0] !== undefined) ? `${lastElement[0]}${number}` : number; 
+      if (this.currentEquation.length <=1 && (parseFloat(predictedNumber) == 0 || isNaN(predictedNumber))) {
         return false;
       }
+
       return true;
     },
 
@@ -266,6 +269,27 @@ export default {
         this.documentElements.pop();
       }
       this.lastOperation = 'deletePress';
+    },
+
+    clearPress() {
+      const lastDocumentElement = this.documentElements.slice(-1);
+      if (lastDocumentElement[0].nodeName !== 'DIV') {
+        // if user is in middle of inputting an equation, only clear the current equation but preserve the last results.
+        const currentEquationString = this.currentEquation.join("");
+        this.documentElements.splice(currentEquationString.length * -1);
+        this.currentEquation = [];
+
+        // const span = document.createElement('span');
+        // span.innerText = 0;
+        // this.documentElements.push(span);
+        // this.currentEquation.push(0);
+      } else {
+        // clear all results
+        this.currentEquation = [];
+        this.documentElements = [];
+      }
+
+      this.lastOperation = 'clearPress';
     }
   }
 }
@@ -292,6 +316,7 @@ export default {
             <calculator-button v-on:button-pressed="equalsPress" press="="></calculator-button>
             <calculator-button v-on:button-pressed="dotPress" press="."></calculator-button>
             <calculator-button v-on:button-pressed="deletePress" press="Backspace" label="Delete"></calculator-button>
+            <calculator-button v-on:button-pressed="clearPress" press="Escape" label="C"></calculator-button>
         </div>  
     </div>
 </template>
