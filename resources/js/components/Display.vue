@@ -4,14 +4,15 @@ export default {
 
   computed: {
     dynamicContent() {
-      return this.content == '' ? '0' : this.content;
+      return this.content == '' ? '<span class="calculator__display-number">0</span>' : this.content;
     }
-  } 
+  },
+  
 }
 </script>
 
 <template>
-    <div v-html="dynamicContent">
+    <div class="calculator__display" v-html="dynamicContent">
        
     </div>
 </template>

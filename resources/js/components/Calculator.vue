@@ -51,12 +51,14 @@ export default {
         this.currentEquation.push(lastElement); //re-add operation to currentEquation array
 
         const span = document.createElement('span');
+        span.classList.add('calculator__display-number');
         span.innerText = number;
         this.documentElements.push(span);
 
         this.currentEquation.push(number);
       } else {
         const span = document.createElement('span');
+        span.classList.add('calculator__display-number');
         span.innerText = number;
         this.documentElements.push(span);
 
@@ -65,6 +67,7 @@ export default {
       }
 
       this.lastOperation = 'numberPress';
+      this.setDisplayScrollToBottom();
     },
 
     operatorPress(operator) {
@@ -84,6 +87,7 @@ export default {
       // automatically set display to 0 if user presses an operation button first
       if (this.currentEquation.length === 0 && this.documentElements.length === 0) {
           const span = document.createElement('span');
+          span.classList.add('calculator__display-number');
           span.innerText = 0;
           this.documentElements.push(span);
           this.currentEquation.push(0);
@@ -94,6 +98,7 @@ export default {
           const splitted = this.currentEquation[0].toString().split("");
           splitted.forEach((element) => {
             const span = document.createElement('span');
+            span.classList.add('calculator__display-number');
             span.innerText = element;
             this.documentElements.push(span);
           });
@@ -107,12 +112,14 @@ export default {
 
 
       const span = document.createElement('span');
+      span.classList.add('calculator__display-operator');
       span.innerText = symbol;
       this.documentElements.push(span);
 
       this.currentEquation.push(operator);
 
       this.lastOperation = 'operatorPress';
+      this.setDisplayScrollToBottom();
     },
 
     equalsPressAllowed() {
@@ -204,10 +211,12 @@ export default {
 
 
       const div = document.createElement('div');
+      div.classList.add('calculator__display-result');
       div.innerHTML = `<span>=</span><span>${result}</span>`;
       this.documentElements.push(div);
 
       this.lastOperation = 'equalsPress';
+      this.setDisplayScrollToBottom();
     },
 
     dotPressAllowed() {
@@ -228,6 +237,7 @@ export default {
 
       if (this.lastOperation === 'equalsPress') {
         const span = document.createElement('span');
+        span.classList.add('calculator__display-number');
         span.innerText = "0";
         this.documentElements.push(span);
         this.currentEquation.push(0);   
@@ -236,6 +246,7 @@ export default {
       // Display 0 on screen if first button pressed by user is .(dot) or if last pressed button is operation (e.g +, -)
       if ((this.currentEquation.length === 0) || (this.lastOperation === 'operatorPress')) {
         const span = document.createElement('span');
+        span.classList.add('calculator__display-number');
         span.innerText = "0";
         this.documentElements.push(span);
         this.currentEquation.push(0);
@@ -246,10 +257,12 @@ export default {
       this.currentEquation.push(newElement);
 
       const span = document.createElement('span');
+      span.classList.add('calculator__display-dot');
       span.innerText = ".";
       this.documentElements.push(span);
 
       this.lastOperation = 'dotPress';
+      this.setDisplayScrollToBottom();
     },
 
     deletePress() {
@@ -269,6 +282,7 @@ export default {
         this.documentElements.pop();
       }
       this.lastOperation = 'deletePress';
+      this.setDisplayScrollToBottom();
     },
 
     clearPress() {
@@ -290,33 +304,83 @@ export default {
       }
 
       this.lastOperation = 'clearPress';
+      this.setDisplayScrollToBottom();
+    },
+
+    setDisplayScrollToBottom() {
+      setTimeout(function () {
+        const display = document.querySelector('.calculator__display');
+        display.scrollTop = display.scrollHeight;
+      }, 10);
     }
   }
 }
 </script>
 
 <template>
-    <div>
+    <div class="calculator-cointainer">
         <display v-bind:content="displayContent"></display>
-        <div>
-            <calculator-button v-on:button-pressed="numberPress" press="1"></calculator-button>
-            <calculator-button v-on:button-pressed="numberPress" press="2"></calculator-button>
-            <calculator-button v-on:button-pressed="numberPress" press="3"></calculator-button>
-            <calculator-button v-on:button-pressed="numberPress" press="4"></calculator-button>
+        <div class="buttons-container">
+            <div class="column">
+              <calculator-button v-on:button-pressed="clearPress" press="Escape" label="C"></calculator-button>
+            </div>
+            <div class="column">
+              <calculator-button v-on:button-pressed="deletePress" press="Backspace" label="Delete"></calculator-button>
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column">
+              <calculator-button v-on:button-pressed="operatorPress" press="/" label="÷"></calculator-button>
+            </div>
+            <div class="column">
+              <calculator-button v-on:button-pressed="numberPress" press="7"></calculator-button>
+            </div>
+            <div class="column">
+              <calculator-button v-on:button-pressed="numberPress" press="8"></calculator-button>
+            </div>
+            <div class="column">
+              <calculator-button v-on:button-pressed="numberPress" press="9"></calculator-button>
+            </div>
+            <div class="column">
+              <calculator-button v-on:button-pressed="operatorPress" press="*" label="×"></calculator-button>
+            </div>
+            <div class="column">
+              <calculator-button v-on:button-pressed="numberPress" press="4"></calculator-button>
+            </div>
+            <div class="column">
             <calculator-button v-on:button-pressed="numberPress" press="5"></calculator-button>
-            <calculator-button v-on:button-pressed="numberPress" press="6"></calculator-button>
-            <calculator-button v-on:button-pressed="numberPress" press="7"></calculator-button>
-            <calculator-button v-on:button-pressed="numberPress" press="8"></calculator-button>
-            <calculator-button v-on:button-pressed="numberPress" press="9"></calculator-button>
-            <calculator-button v-on:button-pressed="numberPress" press="0"></calculator-button>
-            <calculator-button v-on:button-pressed="operatorPress" press="+"></calculator-button>
-            <calculator-button v-on:button-pressed="operatorPress" press="-"></calculator-button>
-            <calculator-button v-on:button-pressed="operatorPress" press="*" label="×"></calculator-button>
-            <calculator-button v-on:button-pressed="operatorPress" press="/" label="÷"></calculator-button>
-            <calculator-button v-on:button-pressed="equalsPress" press="="></calculator-button>
-            <calculator-button v-on:button-pressed="dotPress" press="."></calculator-button>
-            <calculator-button v-on:button-pressed="deletePress" press="Backspace" label="Delete"></calculator-button>
-            <calculator-button v-on:button-pressed="clearPress" press="Escape" label="C"></calculator-button>
+            </div>
+            <div class="column">
+              <calculator-button v-on:button-pressed="numberPress" press="6"></calculator-button>
+            </div>
+            <div class="column">
+              <calculator-button v-on:button-pressed="operatorPress" press="-"></calculator-button>
+            </div>
+            <div class="column">
+              <calculator-button v-on:button-pressed="numberPress" press="1"></calculator-button>
+            </div>
+            <div class="column">
+              <calculator-button v-on:button-pressed="numberPress" press="2"></calculator-button>
+            </div>
+            <div class="column">
+              <calculator-button v-on:button-pressed="numberPress" press="3"></calculator-button>
+            </div>
+            <div class="column">
+              <calculator-button v-on:button-pressed="operatorPress" press="+"></calculator-button>
+            </div>
+            <div class="column">
+              <calculator-button v-on:button-pressed="numberPress" press="0"></calculator-button>
+            </div>
+            <div class="column">
+              <calculator-button v-on:button-pressed="dotPress" press="."></calculator-button>
+            </div>
+            <div class="column">
+              
+            </div>
+            <div class="column">
+              <calculator-button v-on:button-pressed="equalsPress" press="="></calculator-button>
+            </div>
         </div>  
     </div>
 </template>
