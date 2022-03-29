@@ -163,6 +163,13 @@ export default {
       return result;
     },
 
+    performPercentage(index) {
+      const firstNumber = parseFloat(this.currentEquation[index - 1]);
+      const result = parseFloat(firstNumber / 100);
+      this.currentEquation[index - 1] = result;
+      this.currentEquation.splice(index, 1);
+    },
+
     equalsPress() {
       if (!this.equalsPressAllowed()) {
         return false;
@@ -172,6 +179,13 @@ export default {
 
       //loop using MDAS priority. calculation will continue until all calculations are finished
       while (this.currentEquation.length > 2) {
+        const percentSymbol = (element) => element == "%";
+        let percentIndex = this.currentEquation.findIndex(percentSymbol);
+        if (percentIndex !== -1) {
+            result = this.performPercentage(percentIndex);
+            continue;
+        }
+
         const multiplicationSymbol = (element) => element == "*";
         let multiplyIndex = this.currentEquation.findIndex(multiplicationSymbol);
         if (multiplyIndex !== -1) {
@@ -312,6 +326,23 @@ export default {
         const display = document.querySelector('.calculator__display');
         display.scrollTop = display.scrollHeight;
       }, 10);
+    },
+
+    percentPress() {
+      
+      if (this.lastOperation === 'operatorPress' || this.lastOperation === 'percentPress' || this.lastOperation === 'equalsPress') {
+        return false;
+      }
+      
+      const span = document.createElement('span');
+      span.classList.add('calculator__display-percent');
+      span.innerText = "%";
+      this.documentElements.push(span);
+
+      this.currentEquation.push('%');
+
+      this.lastOperation = 'percentPress';
+
     }
   }
 }
@@ -328,7 +359,7 @@ export default {
               <calculator-button v-on:button-pressed="deletePress" press="Backspace" label="Delete"></calculator-button>
             </div>
             <div class="column">
-              
+              <calculator-button v-on:button-pressed="percentPress" press="%"></calculator-button>
             </div>
             <div class="column">
               <calculator-button v-on:button-pressed="operatorPress" press="/" label="÷"></calculator-button>
