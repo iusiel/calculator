@@ -29,7 +29,8 @@ export default {
     numberPressAllowed(number) {
       const lastElement = this.currentEquation.slice(-1);
       const predictedNumber = (lastElement[0] !== undefined) ? `${lastElement[0]}${number}` : number; 
-      if (this.currentEquation.length <=1 && (parseFloat(predictedNumber) == 0 || isNaN(predictedNumber))) {
+
+      if (this.currentEquation.length <=1 && ((parseFloat(predictedNumber) == 0 && predictedNumber.toString().length == 1) || isNaN(predictedNumber))) {
         return false;
       }
 
