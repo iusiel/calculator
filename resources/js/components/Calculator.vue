@@ -407,10 +407,7 @@ export default {
             <div class="column">
               <calculator-button v-on:button-pressed="dotPress" press="."></calculator-button>
             </div>
-            <div class="column">
-              
-            </div>
-            <div class="column">
+            <div class="column column-equals">
               <calculator-button v-on:button-pressed="equalsPress" press="="></calculator-button>
             </div>
         </div>  
