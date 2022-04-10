@@ -1,6 +1,6 @@
 <script>
-import Display from './Display';
-import CalculatorButton from './CalculatorButton';
+import Display from './Display.vue';
+import CalculatorButton from './CalculatorButton.vue';
 
 export default {
   data: function() {
@@ -302,7 +302,7 @@ export default {
 
     clearPress() {
       const lastDocumentElement = this.documentElements.slice(-1);
-      if (lastDocumentElement[0].nodeName !== 'DIV') {
+      if (lastDocumentElement[0] !== undefined && lastDocumentElement[0].nodeName !== 'DIV') {
         // if user is in middle of inputting an equation, only clear the current equation but preserve the last results.
         const currentEquationString = this.currentEquation.join("");
         this.documentElements.splice(currentEquationString.length * -1);
@@ -325,7 +325,9 @@ export default {
     setDisplayScrollToBottom() {
       setTimeout(function () {
         const display = document.querySelector('.calculator__display');
-        display.scrollTop = display.scrollHeight;
+        if (display !== null) {
+          display.scrollTop = display.scrollHeight;
+        }
       }, 10);
     },
 
