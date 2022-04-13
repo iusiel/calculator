@@ -70,5 +70,5 @@ test('test all number presses', async () => {
   button = within(buttonsContainer).getByText("0");
   await fireEvent.click(button);
   expect(document.body.querySelector('.calculator__display').innerHTML).toEqual(`<span class="calculator__display-number">1</span><span class="calculator__display-number">0</span>`); // check if 10
-  await fireEvent.click(clearButton); //reset display after assertion  
+  await fireEvent.click(clearButton); //reset display after assertion 
 })
